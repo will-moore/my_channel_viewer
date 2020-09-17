@@ -1,0 +1,8 @@
+setup.py
+my_channel_viewer/__init__.py
+my_channel_viewer/urls.py
+my_channel_viewer/views.py
+my_channel_viewer.egg-info/PKG-INFO
+my_channel_viewer.egg-info/SOURCES.txt
+my_channel_viewer.egg-info/dependency_links.txt
+my_channel_viewer.egg-info/top_level.txt
