@@ -1,0 +1,30 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+table {
+	font-size: 1em;
+}
+
+.container {
+  display: flex;
+}
+
+.video-container {
+  width: 400px;
+
+  video {
+    max-width: 100%;
+  }
+  canvas {
+    max-width: 100%;
+  }
+}
+
+.ui-draggable, .ui-droppable {
+	background-position: top;
+}
+
+.ui-slider-range, .ui-corner-all, .ui-widget-header {
+    display: inline-block;
+}
