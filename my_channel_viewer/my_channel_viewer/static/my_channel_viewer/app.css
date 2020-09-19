@@ -12,6 +12,14 @@ table {
 	background-position: top;
 }
 
+/* Don't allow images to show full-size */
+.displayed_image {
+  max-width: 200px;
+}
+
+#split_channel_images img {
+  max-width: 150px;
+}
 
 /* 2-handle slider css from https://stackoverflow.com/a/44384948/672737 */
 
