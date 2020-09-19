@@ -21,8 +21,16 @@ table {
   max-width: 150px;
 }
 
+/* color-pickers and LUT chooser float left */
 input[type='color'] {
   float: left;
+}
+#channels select {
+  float: left;
+}
+
+#channels {
+  margin-top: 20px;
 }
 
 /* 2-handle slider css from https://stackoverflow.com/a/44384948/672737 */

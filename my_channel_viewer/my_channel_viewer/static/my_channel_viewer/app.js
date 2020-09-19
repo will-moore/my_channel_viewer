@@ -3,13 +3,15 @@
 $(function () {
   $("#selected_images_dropdown").on('change', function (event) {
     let imageId = event.target.value;
-    console.log('selected', imageId);
     loadImage(imageId);
   });
 
+  // Store the look-up-tables data
+  let lutData;
   // Store the imgData JSON
   let imageData;
 
+  // This is called from dropdown (above) AND when page loads (see bottom)
   function loadImage(imageId) {
     // load imgData
     let url = window.PARAMS.WEBGATEWAY_BASE_URL + 'imgData/' + imageId + '/';
@@ -20,9 +22,14 @@ $(function () {
         let chMax = channel.window.max;
         let chStart = channel.window.start;
         let chEnd = channel.window.end;
+        let lutsHtml = lutData.map(lut => {
+          let lut_name = lut.name.replace('.lut', '');
+          return `<option value="${lut.name}">${lut_name}</option>`;
+        }).join("");
 
         return `
-          <input type="color" value="#${ channel.color }">
+          <input name="color" type="color" value="#${ channel.color }">
+          <select name="lut"><option value=''>LUT</option>${lutsHtml}</select>
           <div>
             <div class="rangeslider">
               <input class="min" name="channel_min" type="range" min="${chMin}" max="${chMax}" value="${chStart}" />
@@ -47,15 +54,32 @@ $(function () {
     });
   }
 
+  // We START by loading look-up-tables (luts) since we can use them for the
+  // channel controls we create later...
+  let lutsUrl = window.PARAMS.WEBGATEWAY_BASE_URL + 'luts/';
+  $.getJSON(lutsUrl, function (data) {
+    // store this for later
+    lutData = data.luts;
+
+    // Then we can load first image...
+    // Use the selected_images_dropdown, first <option> to get Image ID
+    let firstImageId = $("#selected_images_dropdown option:nth-child(2)").attr('value');
+    loadImage(firstImageId);
+  });
+
   // When any channel input changes (slider stops or color picked etc),
   // apply all the input settings to the images
   $("#channels").on("change", "input", function () {
     applyChosenSettings();
   });
+  // Same for when the LUT select is changed
+  $("#channels").on("change", "select", function () {
+    applyChosenSettings();
+  });
 
 
   function applyChosenSettings() {
-    // for the min, max and color inputs, put the value from each in a list
+    // for the min, max, color and LUT inputs, put the value from each in a list
     // Use the values to set rendering settings on the 'display images' and
     // the 'split channel images'
     let minValues = [];
@@ -65,6 +89,13 @@ $(function () {
     $("input[name='channel_max']").each(function () { maxValues.push(this.value); });
     // color value is '#ff0000', we want to remove the '#'
     $("input[type='color']").each(function () { colors.push(this.value.replace("#", '')); });
+    // if a LUT has been chosen, we replace the color with e.g. "16_colors.lut"
+    $("select[name='lut']").each(function (channel_index) {
+      let lut = this.value;
+      if (lut.length > 0) {
+        colors[channel_index] = lut;
+      }
+    });
 
     render_displayed_images(minValues, maxValues, colors);
     render_split_channels(minValues, maxValues, colors);
@@ -109,7 +140,4 @@ $(function () {
     });
   };
 
-  // Load first image directly...
-  let firstImageId = $("#selected_images_dropdown option:nth-child(2)").attr('value');
-  loadImage(firstImageId);
 })
