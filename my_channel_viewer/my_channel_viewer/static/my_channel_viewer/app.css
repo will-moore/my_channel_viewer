@@ -21,6 +21,10 @@ table {
   max-width: 150px;
 }
 
+input[type='color'] {
+  float: left;
+}
+
 /* 2-handle slider css from https://stackoverflow.com/a/44384948/672737 */
 
 input[type='range'] {

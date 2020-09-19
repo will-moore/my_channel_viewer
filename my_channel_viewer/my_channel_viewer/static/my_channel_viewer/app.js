@@ -22,6 +22,7 @@ $(function () {
         let chEnd = channel.window.end;
 
         return `
+          <input type="color" value="#${ channel.color }">
           <div>
             <div class="rangeslider">
               <input class="min" name="channel_min" type="range" min="${chMin}" max="${chMax}" value="${chStart}" />
@@ -46,30 +47,37 @@ $(function () {
     });
   }
 
-  // When a slider changes (stop sliding), re-render images
-  $("#channels").on("change", ".rangeslider input", function () {
+  // When any channel input changes (slider stops or color picked etc),
+  // apply all the input settings to the images
+  $("#channels").on("change", "input", function () {
     applyChosenSettings();
   });
 
 
   function applyChosenSettings() {
-    // for each slider, get 
+    // for the min, max and color inputs, put the value from each in a list
+    // Use the values to set rendering settings on the 'display images' and
+    // the 'split channel images'
     let minValues = [];
     let maxValues = [];
+    let colors = [];
     $("input[name='channel_min']").each(function () { minValues.push(this.value); });
     $("input[name='channel_max']").each(function () { maxValues.push(this.value); });
+    // color value is '#ff0000', we want to remove the '#'
+    $("input[type='color']").each(function () { colors.push(this.value.replace("#", '')); });
 
-    render_displayed_images(minValues, maxValues);
-    render_split_channels(minValues, maxValues);
+    render_displayed_images(minValues, maxValues, colors);
+    render_split_channels(minValues, maxValues, colors);
   };
 
 
-  function render_displayed_images(minValues, maxValues) {
+  function render_displayed_images(minValues, maxValues, colors) {
     // Use the imageData, with the min/max values to apply rendering settings
     // for ALL channels to each of the displayed images
     let query = imageData.channels.map((channel,index) => {
-      let act = channel.active ? '' : '-';
-      return `${act}${index + 1}|${minValues[index]}:${maxValues[index]}$${channel.color}`
+      let active = channel.active ? '' : '-';
+      let color = colors[index];
+      return `${active}${index + 1}|${minValues[index]}:${maxValues[index]}$${color}`
     });
     query = '?c=' + query.join(',');
 
@@ -81,7 +89,7 @@ $(function () {
     })
   };
 
-  function render_split_channels(minValues, maxValues) {
+  function render_split_channels(minValues, maxValues, colors) {
     // Use the imageData, with the min/max values to show each channel of
     // the selected image
 
@@ -90,7 +98,9 @@ $(function () {
 
       let chStart = minValues[index];
       let chEnd = maxValues[index];
-      let renderQuery = `${index + 1}|${chStart}:${chEnd}$${channel.color}`
+      let color = colors[index];
+      let active = channel.active ? '' : '-';
+      let renderQuery = `${active}${index + 1}|${chStart}:${chEnd}$${color}`
       let imgSrc = window.PARAMS.WEBGATEWAY_BASE_URL + 'render_image/' + imageData.id + '/';
       imgSrc = imgSrc + '?c=' + renderQuery;
 
