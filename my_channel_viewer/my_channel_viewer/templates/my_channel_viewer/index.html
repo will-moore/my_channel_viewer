@@ -6,68 +6,29 @@
         <!-- Include static css -->
         <link rel="stylesheet" type="text/css" href="{% static 'my_channel_viewer/app.css' %}" />
         <link rel="stylesheet" type="text/css" media="screen" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
-        <link rel="stylesheet" type="text/css" href="{% static 'my_channel_viewer/style.css' %}" />
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
         <script type="text/javascript">
             // Global variables, used by JavaScript code.
             window.PARAMS = {};
             window.PARAMS.EXP_ID = {{ experimenterId }};
 
-            // Render a URL to the /api/v0/ URL for loading JSON data
+            // Render a URL to the /api/v0/ URL for loading JSON data. In HTML because Django can't be used directly in JS.
             window.PARAMS.API_BASE_URL = "{% url 'api_base' 0 %}";
+            window.PARAMS.WEBGATEWAY_BASE_URL = "{% url 'webgateway' %}";
         </script>
 
-        <script type="text/javascript">
-          function getImageID(selection){
-            //alert(selection.value);
-            //window.getElementByID("DisplayedImage") = selection.value;
-            console.log(selection.value);
-            console.log(document.getElementById("DisplayedImage"))
-            return selection.value;
-          }
-        </script>
-
+        <!-- Include the static JavaScript -->
+        <script src="{% static 'my_channel_viewer/app.js' %}"></script>
     </head>
 
     <body>
         <h1>Welcome to my channel viewer</h1>
-        <p>
-            Logged in as:
-            <!-- Django template renders values from context -->
-            <strong>{{ firstName }} {{ lastName }}</strong>
-        </p>
 
-        <p id="projects">
-            Loading Projects...
-        </p>
-        <!--
-        <form title="Select Project and Dataset">
-
-        Select image:
-        <select name="Image_dropdown" method="get" action="{% url 'index' %}">
-          {% for project in projects %}
-            <optgroup label={{ project.project_name }} value={{project.project_id}}>
-
-            {% for dataset in project.project_datasets %}
-              <optgroup label={{ dataset.dataset_name }} value={{dataset.dataset_id}}>
-                {% for image in dataset.dataset_images %}
-                  <option label={{image.image_name}} value={{image.image_id}}></option>
-                {% endfor %}
-              </optgroup>
-            {% endfor %}
-
-          </optgroup>
-          {% endfor %}
-        </select>
-        <input type="submit" value="Submit image" name="submit_image">
-        </form>
-        -->
 
         <form title="Selected images">
           Select image to display:
-          <select name="Selected_images_dropdown" method="get" action="{% url 'index' %}" onchange="getImageID(this)">
+          <select id="Selected_images_dropdown" method="get" action="{% url 'index' %}">
             <option value="" selected disabled hidden>Choose here</option>
             {% for loaded_image in selected_images %}
               <option label={{loaded_image.name}} value={{loaded_image.id}}></option>
@@ -75,15 +36,14 @@
           </select>
         </form>
 
-        {% for image in selected_images %}
-          <img id="DisplayedImage" src="{% url 'web_render_image' image.id %}" />
-        {% endfor %}
+        <!--
+        <div id="ChannelsShowButtons">
+        </div>
+        -->
 
-        <div id="TuningSliders">
-
+        <!-- When the user chooses an image, we load imgData and build channel controls here -->
+        <div id="TuningItems">
         </div>
 
-        <!-- Include the static JavaScript -->
-        <script src="{% static 'my_channel_viewer/app.js' %}"></script>
     </body>
 </html>
