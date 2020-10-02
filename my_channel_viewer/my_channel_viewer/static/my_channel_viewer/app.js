@@ -63,22 +63,18 @@ function updateChannelColor(currentImageDataJSON, index){
 
 function updateColorChanger(currentImageDataJSON, index){
   var colorChangerIdentifier = "#color_"+currentImageDataJSON.channels[index].label
-  jQuery(document).ready(function ($) {
     $(colorChangerIdentifier).on("change", "input", function () { //Not working?
       //updateChannelAndResultImage(currentImageDataJSON, index)
       updateAllChannelsAndResultImage(currentImageDataJSON)
     });
-  });
 }
 
 function updateLUTChanger(currentImageDataJSON, index){
-  var lutChangerIdentifier = "#lut_"+currentImageDataJSON.channels[index].label
-  jQuery(document).ready(function ($) {
-    $(lutChangerIdentifier).on("change", "select", function () { //Not working?
-      //updateChannelAndResultImage(currentImageDataJSON, index)
-      updateAllChannelsAndResultImage(currentImageDataJSON)
-    });
-  });
+  // var lutChangerIdentifier = "#lut_"+currentImageDataJSON.channels[index].label
+  //   $(lutChangerIdentifier).on("change", "select", function () { //Not working?
+  //     //updateChannelAndResultImage(currentImageDataJSON, index)
+  //     updateAllChannelsAndResultImage(currentImageDataJSON)
+  //   });
 }
 
 function makeThumbnails(){
@@ -115,7 +111,7 @@ function updateZDepthTuningSlider(currentImageDataJSON){
 function updateTTimeTuningSlider(currentImageDataJSON){
   var sliderIdentifier = "#ttime-slider_"+currentImageDataJSON.id;
   var valueVisualizerIdentifier = "#TtimeValue_"+currentImageDataJSON.rdefs.defaultT;
-  jQuery(document).ready(function ($) {
+  // jQuery(document).ready(function ($) {
     $( sliderIdentifier ).slider({
       orientation: "horizontal",
       range: "min",
@@ -134,7 +130,7 @@ function updateTTimeTuningSlider(currentImageDataJSON){
       }
     });
     $( valueVisualizerIdentifier ).val( $( sliderIdentifier ).slider( "value" ) );
-  });
+  // });
 }
 
 function updateChannelTuningSlider(currentImageDataJSON, index){
@@ -171,11 +167,10 @@ function updateChannelTuningSlider(currentImageDataJSON, index){
 }
 
 function updateAllChangers(currentImageDataJSON, index){
-  jQuery(document).ready(function ($) {
+  console.log('updateAllChangers', currentImageDataJSON, index)
     updateColorChanger(currentImageDataJSON, index);
     updateLUTChanger(currentImageDataJSON, index);
     updateChannelTuningSlider(currentImageDataJSON, index)
-  });
 }
 
 function generateTuningThumbnailHTMLlist(currentImageDataJSON){
@@ -221,7 +216,7 @@ function generateChannelTuningHTML(currentImageDataJSON, currentLUTsJSON, index)
         <input name="active-or-not" type="checkbox" id="checkbox_${currentImageDataJSON.channels[index].label}" checked>
       </p>
       <input name="color" class="ColorChanger" type="color" id="color_${currentImageDataJSON.channels[index].label}" value="#${currentImageDataJSON.channels[index].color}">
-      <select name="lut" id="lut_${currentImageDataJSON.channels[index].label}"><option value=''>No custom LUT</option>${lutsHtml}</select>
+      <select class="lut" name="lut" id="lut_${currentImageDataJSON.channels[index].label}"><option value=''>No custom LUT</option>${lutsHtml}</select>
     </div>
     `
     return channelRenderingHTMLstring;
@@ -427,6 +422,9 @@ projectsUrl += '?owner=' + PARAMS.EXP_ID;
 
 // When the page loads, listen for changes to the selected_images_dropdown...
 $(function () {
+  // The currentImageDataJSON will be available anywhere inside this function...
+  let currentImageDataJSON;
+
   $("#Selected_images_dropdown").on('change', function (event) {
     let imageId = event.target.value;
     console.log('selected', imageId);
@@ -448,8 +446,9 @@ $(function () {
     let imageDataURL = window.PARAMS.WEBGATEWAY_BASE_URL + 'imgData/' + imageId + '/';
     let lutsUrl = window.PARAMS.WEBGATEWAY_BASE_URL + 'luts/';
     $.getJSON(lutsUrl, function (currentLUTsJSON) {
-      $.getJSON(imageDataURL, function (currentImageDataJSON) {
-        jQuery(document).ready(function ($) { //Important pour affichage correct au chargement
+      $.getJSON(imageDataURL, function (data) {
+        currentImageDataJSON = data;
+        //jQuery(document).ready(function ($) { //Important pour affichage correct au chargement
           var tuningThumbnailsHTMLlist = generateTuningThumbnailHTMLlist(currentImageDataJSON)
           var resultRenderingHTMLstring = generateResultImageHTML(currentImageDataJSON);
           var allChannelsHTMLstring = generateAllChannelsTuningHTML(currentImageDataJSON, currentLUTsJSON);
@@ -465,12 +464,22 @@ $(function () {
             updateAllChangers(currentImageDataJSON, index)
             //updateChannelTuningSlider(currentImageDataJSON, index)
           }
-          console.log(currentImageDataJSON)
-        });
+        console.log('currentImageDataJSON', currentImageDataJSON);
+        // Immediately show the initial state...
+        updateAllChannelsAndResultImage(currentImageDataJSON)
+        //});
       }); //Fin du getJSON LUT
     }); //Fin du getJSON imageData
   });
 
+
+  // setup listeners on any <select class='lut'> choosers that we may create later
+  // We bind ONE event listener to the #TuningItems element when the page loads.
+  // This will capture any events coming from LUT choosers
+  $("#TuningItems").on("change", "select.lut", function () {
+    console.log('select LUT...', currentImageDataJSON);
+    updateAllChannelsAndResultImage(currentImageDataJSON)
+  });
 });
 
 
