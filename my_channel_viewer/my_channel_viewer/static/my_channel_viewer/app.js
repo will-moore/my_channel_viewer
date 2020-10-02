@@ -215,8 +215,8 @@ function generateChannelTuningHTML(currentImageDataJSON, currentLUTsJSON, index)
         <label for="checkbox_${currentImageDataJSON.channels[index].label}">Enable/Disable Channel:
         <input name="active-or-not" type="checkbox" id="checkbox_${currentImageDataJSON.channels[index].label}" checked>
       </p>
-      <input name="color" class="ColorChanger" type="color" id="color_${currentImageDataJSON.channels[index].label}" value="#${currentImageDataJSON.channels[index].color}">
-      <select class="lut" name="lut" id="lut_${currentImageDataJSON.channels[index].label}"><option value=''>No custom LUT</option>${lutsHtml}</select>
+      <input name="color_${index}" class="ColorChanger" type="color" id="color_${currentImageDataJSON.channels[index].label}" value="#${currentImageDataJSON.channels[index].color}">
+      <select class="lut" name="lut_${index}" id="lut_${currentImageDataJSON.channels[index].label}"><option value=''>No custom LUT</option>${lutsHtml}</select>
     </div>
     `
     return channelRenderingHTMLstring;
