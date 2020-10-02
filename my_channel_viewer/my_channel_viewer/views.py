@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
+from django.views.decorators.http import require_POST
+from django.http import HttpResponse
 
 from omeroweb.decorators import login_required
 from omeroweb.webclient import views as webclient_views
@@ -29,23 +31,23 @@ def index(request, conn=None, **kwargs):
     experimenter = conn.getUser()
 
     projects_list = []
-    for project in conn.listProjects():
-        project_dict_item = {}
-        project_dict_item['project_id'] = project.getId()
-        project_dict_item['project_name'] = project.getName()
-        project_dict_item['project_datasets'] = []
-        for dataset in project.listChildren():
-            dataset_dict_item = {}
-            dataset_dict_item['dataset_id'] = dataset.getId()
-            dataset_dict_item['dataset_name'] = dataset.getName()
-            dataset_dict_item['dataset_images'] = []
-            for image in dataset.listChildren():
-                image_dict_item = {}
-                image_dict_item['image_id'] = image.getId()
-                image_dict_item['image_name'] = image.getName()
-                dataset_dict_item['dataset_images'].append(image_dict_item)
-            project_dict_item['project_datasets'].append(dataset_dict_item)
-        projects_list.append(project_dict_item)
+    # for project in conn.listProjects():
+    #     project_dict_item = {}
+    #     project_dict_item['project_id'] = project.getId()
+    #     project_dict_item['project_name'] = project.getName()
+    #     project_dict_item['project_datasets'] = []
+    #     for dataset in project.listChildren():
+    #         dataset_dict_item = {}
+    #         dataset_dict_item['dataset_id'] = dataset.getId()
+    #         dataset_dict_item['dataset_name'] = dataset.getName()
+    #         dataset_dict_item['dataset_images'] = []
+    #         for image in dataset.listChildren():
+    #             image_dict_item = {}
+    #             image_dict_item['image_id'] = image.getId()
+    #             image_dict_item['image_name'] = image.getName()
+    #             dataset_dict_item['dataset_images'].append(image_dict_item)
+    #         project_dict_item['project_datasets'].append(dataset_dict_item)
+    #     projects_list.append(project_dict_item)
 
     #listed_datasets = list(conn.getObjects('Dataset', params["IDs"])) #list() permet de convertir l'objet datasets en liste -> permet d'afficher les identifiants
 
@@ -137,4 +139,20 @@ def index(request, conn=None, **kwargs):
     return render(request, 'my_channel_viewer/index.html', context)
 
 
+@require_POST
+@login_required()
+def handle_submit(request, conn=None, **kwargs):
+
+    selected_image = request.POST.get('selected_image')
+    print('selected_image', selected_image)
+
+    image = conn.getObject('Image', selected_image)
+
+    for ch_index in range(image.getSizeC()):
+        color = request.POST.get('color_%s' % ch_index)
+        lut = request.POST.get('lut_%s' % ch_index)
+        print(ch_index, color, lut)
+
+
+    return HttpResponse("Thankyou")
 #voir https://downloads.openmicroscopy.org/omero/5.5.0/api/python/omero/omero.gateway.html

@@ -26,15 +26,19 @@
         <h1>Welcome to my channel viewer</h1>
 
 
-        <form title="Selected images">
+        <form title="Selected images" action="{% url 'my_channel_viewer_handle_submit' %}" method="POST">
+          <!-- hidden field with CSRF token -->
+          {% csrf_token %}
+
           Select image to display:
-          <select id="Selected_images_dropdown" method="get" action="{% url 'index' %}">
+          <select name="selected_image" id="Selected_images_dropdown" method="get" action="{% url 'index' %}">
             <option value="" selected disabled hidden>Choose here</option>
             {% for loaded_image in selected_images %}
               <option label={{loaded_image.name}} value={{loaded_image.id}}></option>
             {% endfor %}
           </select>
-        </form>
+
+          <hr>
 
         <!--
         <div id="ChannelsShowButtons">
@@ -42,8 +46,11 @@
         -->
 
         <!-- When the user chooses an image, we load imgData and build channel controls here -->
-        <div id="TuningItems">
-        </div>
+            <div id="TuningItems">
+            </div>
+
+            <button type="submit">Submit</button>
+          </form>
 
     </body>
 </html>

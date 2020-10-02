@@ -146,7 +146,7 @@ table {
   display: none !important;
 }
 
-#TuningItems div {
+#TuningItems>div {
     margin: 80px 40px;
     padding: 25px;
     /*background: #cccfff;*/
