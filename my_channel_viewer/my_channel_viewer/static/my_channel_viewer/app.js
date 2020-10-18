@@ -136,8 +136,8 @@ function updateTTimeTuningSlider(currentImageDataJSON){
 }
 
 function updateChannelTuningSlider(currentImageDataJSON, index){
-  var sliderIdentifier = "#slider-range_"+currentImageDataJSON.channels[index].label.toString();
-  var valueVisualizerIdentifier = "#minmaxPixelValues_"+currentImageDataJSON.channels[index].label.toString();
+  var sliderIdentifier = "#slider-range_"+index;
+  var valueVisualizerIdentifier = "#minmaxPixelValues_"+index;
   //currentImageDataJSON.pixel_range[1] = document.getElementById("RealDynamicRange").value;
   jQuery(document).ready(function ($) {
     $( sliderIdentifier ).slider({
