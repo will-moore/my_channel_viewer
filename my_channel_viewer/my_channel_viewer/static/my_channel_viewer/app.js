@@ -29,7 +29,8 @@ function makeChannelImage(currentImageDataJSON, index){
   let channelMinimalValue = currentImageDataJSON.channels[index].window.min;
   let channelMaximalValue = currentImageDataJSON.channels[index].window.max;
 
-  if ($("#checkbox_"+currentImageDataJSON.channels[index].label).is(':checked')){
+  console.log('index', "#checkbox_" + index, $("#checkbox_" + index).length, currentImageDataJSON.channels[index].active);
+  if ($("#checkbox_"+index).is(':checked')){
     currentImageDataJSON.channels[index].active = true;
   }
   else{
@@ -38,6 +39,7 @@ function makeChannelImage(currentImageDataJSON, index){
 
   //Check if channel active or not
   var channelActiveOrNotCharacter = "";
+  console.log('active', currentImageDataJSON.channels[index].active == false)
   if (currentImageDataJSON.channels[index].active == false){
     channelActiveOrNotCharacter = "-";
   }
@@ -49,9 +51,9 @@ function makeChannelImage(currentImageDataJSON, index){
 
 function updateChannelColor(currentImageDataJSON, index){
   let channelLabel = currentImageDataJSON.channels[index].label
-  var colorChooserIdentifier = "color_"+channelLabel;
+  var colorChooserIdentifier = "color_"+index;
   // color value is '#ff0000', we want to remove the '#'
-  var lutChooserIdentifier = "lut_"+currentImageDataJSON.channels[index].label
+  var lutChooserIdentifier = "lut_" + index;
   if(document.getElementById(lutChooserIdentifier).value != ""){
     var newColor = document.getElementById(lutChooserIdentifier).value.replace("#", '');
   }
@@ -200,23 +202,25 @@ function generateChannelTuningHTML(currentImageDataJSON, currentLUTsJSON, index)
     return `<option value="${lut.name}">${lut_name}</option>`;
   }).join("");
 
-  var channelRenderingURL = updateChannelImageURL(currentImageDataJSON, index);
+  // We need to the channel checkboxes, and other html elements to get the image src
+  // So we can't get this before we build the html
+  var channelRenderingURL = "";
 
   var channelRenderingHTMLstring = `
     <div style="position:relative;" class="ChannelTuner" id="tuner_+${currentImageDataJSON.channels[index].label}">
-      <img class="ChannelImage" id="${currentImageDataJSON.channels[index].label}" src="${channelRenderingURL}"/>
+      <img class="ChannelImage" id="channel_image_${index}" src="${channelRenderingURL}"/>
       <p>
-        <label for="minmaxPixelValues_${currentImageDataJSON.channels[index].label}">Channel ${currentImageDataJSON.channels[index].label}:</label>
-        <input type="text" id="minmaxPixelValues_${currentImageDataJSON.channels[index].label}" readonly style="border:0; color:#${currentImageDataJSON.channels[index].color}; font-weight:bold;">
+        <label for="minmaxPixelValues_${index}">Channel ${currentImageDataJSON.channels[index].label}:</label>
+        <input type="text" id="minmaxPixelValues_${index}" readonly style="border:0; color:#${currentImageDataJSON.channels[index].color}; font-weight:bold;">
       </p>
-      <span id="slider-range_${currentImageDataJSON.channels[index].label}" class="ui-slider-range" style="left: 0%; width: 40%;">
+      <span id="slider-range_${index}" class="ui-slider-range" style="left: 0%; width: 40%;">
       </span>
       <p>
-        <label for="checkbox_${currentImageDataJSON.channels[index].label}">Enable/Disable Channel:
-        <input name="active-or-not" type="checkbox" id="checkbox_${currentImageDataJSON.channels[index].label}" checked>
+        <label for="checkbox_${index}">Enable/Disable Channel:
+        <input name="active-or-not_${index}" type="checkbox" id="checkbox_${index}" checked>
       </p>
-      <input name="color_${index}" class="ColorChanger" type="color" id="color_${currentImageDataJSON.channels[index].label}" value="#${currentImageDataJSON.channels[index].color}">
-      <select class="lut" name="lut_${index}" id="lut_${currentImageDataJSON.channels[index].label}"><option value=''>No custom LUT</option>${lutsHtml}</select>
+      <input name="color_${index}" class="ColorChanger" type="color" id="color_${index}" value="#${currentImageDataJSON.channels[index].color}">
+      <select class="lut" name="lut_${index}" id="lut_${index}"><option value=''>No custom LUT</option>${lutsHtml}</select>
     </div>
     `
     return channelRenderingHTMLstring;
@@ -233,7 +237,8 @@ function generateAllChannelsTuningHTML(currentImageDataJSON, currentLUTsJSON){
 
 function generateResultImageHTML(currentImageDataJSON){
 
-  var resultImageURL = updateResultImageURL(currentImageDataJSON);
+
+  var resultImageURL = "" // updateResultImageURL(currentImageDataJSON);
 
   var resultRenderingHTMLstring = `
     <div style="position:relative;" class="ResultTuner" id="tuner_result">
@@ -349,12 +354,14 @@ function updateChannelImageURL(currentImageDataJSON, index){
 }
 
 function updateChannelImage(currentImageDataJSON, index){
+  console.log('updateChannelImage...', index);
   updateChannelColor(currentImageDataJSON, index)
   var channelRenderingURL = updateChannelImageURL(currentImageDataJSON, index)
-  var imageIdentifier = "#"+currentImageDataJSON.channels[index].label;
-  var minmaxIdentifier = "#minmaxPixelValues_"+currentImageDataJSON.channels[index].label;
-  var lutChooserIdentifier = "lut_"+currentImageDataJSON.channels[index].label
+  var imageIdentifier = "#channel_image_"+index;
+  var minmaxIdentifier = "#minmaxPixelValues_"+index;
+  var lutChooserIdentifier = "lut_" + index
   $(imageIdentifier).attr('src', channelRenderingURL);
+  console.log('$(imageIdentifier)', imageIdentifier, $(imageIdentifier).length);
   if(document.getElementById(lutChooserIdentifier).value == ""){
     $(minmaxIdentifier).attr('style', "border:0; color: #"+currentImageDataJSON.channels[index].color+"; font-weight:bold;")
   }
@@ -448,7 +455,7 @@ $(function () {
     $.getJSON(lutsUrl, function (currentLUTsJSON) {
       $.getJSON(imageDataURL, function (data) {
         currentImageDataJSON = data;
-        //jQuery(document).ready(function ($) { //Important pour affichage correct au chargement
+
           var tuningThumbnailsHTMLlist = generateTuningThumbnailHTMLlist(currentImageDataJSON)
           var resultRenderingHTMLstring = generateResultImageHTML(currentImageDataJSON);
           var allChannelsHTMLstring = generateAllChannelsTuningHTML(currentImageDataJSON, currentLUTsJSON);
@@ -457,6 +464,7 @@ $(function () {
           //$("#TuningItems").html(resultRenderingHTMLstring);
           //$("#TuningItems").html(allChannelsHTMLstring);
           $("#TuningItems").html(fullHTMLstring);
+          console.log('setting ALL html...')
           makeThumbnails();
           updateZDepthTuningSlider(currentImageDataJSON);
           updateTTimeTuningSlider(currentImageDataJSON)
@@ -467,7 +475,7 @@ $(function () {
         console.log('currentImageDataJSON', currentImageDataJSON);
         // Immediately show the initial state...
         updateAllChannelsAndResultImage(currentImageDataJSON)
-        //});
+
       }); //Fin du getJSON LUT
     }); //Fin du getJSON imageData
   });
